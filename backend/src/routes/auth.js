@@ -34,4 +34,22 @@ router.get('/me', requireAuth, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+router.put('/change-password', requireAuth, async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) return res.status(400).json({ error: 'Current and new password required' });
+    if (newPassword.length < 6) return res.status(400).json({ error: 'New password must be at least 6 characters' });
+
+    const user = await User.findById(req.session.userId);
+    if (!user) return res.status(401).json({ error: 'Session expired' });
+
+    const match = await user.comparePassword(currentPassword);
+    if (!match) return res.status(400).json({ error: 'Current password is incorrect' });
+
+    user.password = newPassword;
+    await user.save();
+    res.json({ ok: true });
+  } catch (err) { next(err); }
+});
+
 module.exports = router;

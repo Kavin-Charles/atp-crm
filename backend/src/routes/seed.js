@@ -10,6 +10,19 @@ async function seedDatabase() {
     console.log('✓ Default admin created (admin / admin123)');
   }
 
+  const namedAdmins = [
+    { username: 'rajsundari', password: 'rajsundari123', name: 'Rajsundari' },
+    { username: 'charles',    password: 'charles123',    name: 'Charles' },
+    { username: 'sivakumar',  password: 'sivakumar123',  name: 'Sivakumar' },
+  ];
+  for (const a of namedAdmins) {
+    const exists = await User.findOne({ username: a.username });
+    if (!exists) {
+      await new User({ ...a, role: 'admin' }).save();
+      console.log(`✓ Admin created: ${a.username}`);
+    }
+  }
+
   const jobCount = await Job.countDocuments();
   if (jobCount > 0) return;
 

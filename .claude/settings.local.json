@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh --version)",
+      "Bash(gh auth *)",
+      "Bash(gcloud --version)",
+      "Bash(curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-linux-x86_64.tar.gz)",
+      "Bash(tar -xf google-cloud-cli-linux-x86_64.tar.gz -C /home/kavin/)",
+      "Bash(/home/kavin/google-cloud-sdk/install.sh --quiet --path-update=true)",
+      "Bash(export PATH=\"/home/kavin/google-cloud-sdk/bin:$PATH\")",
+      "Bash(gcloud version *)",
+      "Bash(gcloud config *)",
+      "Bash(gcloud auth *)",
+      "Bash(gcloud services *)",
+      "Bash(gcloud run *)",
+      "Bash(gh api *)",
+      "Read(//home/kavin/.local/share/omarchy/default/omarchy-skill/**)",
+      "Read(//home/kavin/.local/share/claude-code/**)",
+      "Bash(claude --version)",
+      "Read(//home/kavin/.claude/**)",
+      "Bash(claude plugin *)",
+      "Bash(claude plugins *)"
+    ]
+  }
+}

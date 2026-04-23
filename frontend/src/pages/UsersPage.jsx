@@ -135,7 +135,7 @@ export default function UsersPage() {
                           u.role === 'admin'
                             ? 'bg-red-50 text-red-700'
                             : u.role === 'manager'
-                            ? 'bg-indigo-50 text-indigo-700'
+                            ? 'bg-brand-100 text-brand-700'
                             : 'bg-slate-100 text-slate-600'
                         }`}>
                           {(u.name || u.username || '?').charAt(0).toUpperCase()}
