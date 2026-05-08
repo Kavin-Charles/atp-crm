@@ -14,6 +14,7 @@ const schema = new mongoose.Schema({
   rajFeedback:        { type: String },
   expectedCompletion: { type: Date },
   releaseDate:        { type: Date },
+  backupDate:         { type: Date },
   paymentStatus:      { type: String, enum: ['pending', 'partial', 'received'], default: 'pending' },
   paymentMode:        { type: String, enum: ['bank transfer', 'cheque', 'UPI', 'cash', 'other', ''] },
   paymentNotes:       { type: String },

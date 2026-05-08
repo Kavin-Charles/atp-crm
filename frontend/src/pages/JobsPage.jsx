@@ -310,6 +310,7 @@ export default function JobsPage() {
       rajFeedback: job.rajFeedback,
       expectedCompletion: formatDateInput(job.expectedCompletion),
       releaseDate: formatDateInput(job.releaseDate),
+      backupDate: formatDateInput(job.backupDate),
     });
     setModalOpen(true);
   }
@@ -358,7 +359,7 @@ export default function JobsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50">
-                  {['ATP #', 'Company', 'Job Name', 'Owner', 'Designer', 'Hrs Q/W', 'Status', 'Payment', 'Expected', 'Actions'].map((h) => (
+                  {['ATP #', 'Company', 'Job Name', 'Owner', 'Designer', 'Hrs Q/W', 'Status', 'Payment', 'Expected', 'Released', 'Backup', 'Actions'].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">
                       {h}
                     </th>
@@ -384,6 +385,12 @@ export default function JobsPage() {
                     <td className="px-4 py-3"><Badge status={job.paymentStatus} /></td>
                     <td className="px-4 py-3 text-slate-400 whitespace-nowrap">
                       {job.expectedCompletion ? formatDate(job.expectedCompletion) : '—'}
+                    </td>
+                    <td className="px-4 py-3 text-slate-400 whitespace-nowrap">
+                      {job.releaseDate ? formatDate(job.releaseDate) : '—'}
+                    </td>
+                    <td className="px-4 py-3 text-slate-400 whitespace-nowrap">
+                      {job.backupDate ? formatDate(job.backupDate) : '—'}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
@@ -464,6 +471,9 @@ export default function JobsPage() {
             </FormField>
             <FormField label="Release Date" error={errors.releaseDate}>
               <Input type="date" {...register('releaseDate')} />
+            </FormField>
+            <FormField label="Backup Date" error={errors.backupDate}>
+              <Input type="date" {...register('backupDate')} />
             </FormField>
             <div className="col-span-2">
               <FormField label="Manager Feedback" error={errors.rajFeedback}>

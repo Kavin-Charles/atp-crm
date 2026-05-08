@@ -5,6 +5,7 @@ const schema = new mongoose.Schema({
   company: { type: String, trim: true },
   phone:   { type: String, trim: true },
   email:   { type: String, trim: true },
+  address: { type: String, trim: true },
   service: { type: String, trim: true },
   notes:   { type: String },
   source:  { type: String, enum: ['referral', 'website', 'cold call', 'email', 'walk-in', 'other', 'manual', 'import'], default: 'manual' },

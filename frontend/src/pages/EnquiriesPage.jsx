@@ -21,7 +21,7 @@ import { toast } from 'sonner';
 
 const STATUS_OPTIONS = ['new', 'contacted', 'quoted', 'converted', 'closed'];
 const SOURCE_OPTIONS = ['referral', 'website', 'cold call', 'email', 'walk-in', 'other'];
-const SERVICE_OPTIONS = ['PCB Design', 'PCB Layout', 'Schematic', 'Gerber Review', 'DFM Check', 'Other'];
+const SERVICE_OPTIONS = ['PCB Layout', 'Full Turn Key', 'Debugging', 'Other'];
 
 export default function EnquiriesPage() {
   const { can } = useAuth();
@@ -89,6 +89,7 @@ export default function EnquiriesPage() {
       company: enq.company,
       phone: enq.phone,
       email: enq.email,
+      address: enq.address,
       service: enq.service,
       source: enq.source,
       status: enq.status,
@@ -199,6 +200,11 @@ export default function EnquiriesPage() {
             <FormField label="Email" error={errors.email}>
               <Input type="email" placeholder="email@example.com" {...register('email')} />
             </FormField>
+            <div className="col-span-2">
+              <FormField label="Address" error={errors.address}>
+                <Input placeholder="Street, City, State, PIN" {...register('address')} />
+              </FormField>
+            </div>
             <FormField label="Service" error={errors.service}>
               <Select {...register('service')}>
                 <option value="">Select service</option>
