@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Inbox, FileText, Briefcase, CheckCircle } from 'lucide-react';
+import { Inbox, FileText, Briefcase, CheckCircle, Send, HardDrive } from 'lucide-react';
 import { statsApi } from '@/api/stats';
 import { jobsApi } from '@/api/jobs';
 import StatCard from '@/components/shared/StatCard';
@@ -26,7 +26,7 @@ export default function DashboardPage() {
       {statsLoading ? (
         <div className="flex justify-center py-8"><Spinner /></div>
       ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
           <StatCard
             label="Total Enquiries"
             value={stats?.enquiries.total}
@@ -54,6 +54,20 @@ export default function DashboardPage() {
             sub={`${stats?.payments.pending} pending`}
             icon={CheckCircle}
             color="green"
+          />
+          <StatCard
+            label="Released Jobs"
+            value={stats?.jobs.released}
+            sub={`of ${stats?.jobs.total} total`}
+            icon={Send}
+            color="brand"
+          />
+          <StatCard
+            label="Backed Up"
+            value={stats?.jobs.backedUp}
+            sub={`of ${stats?.jobs.total} total`}
+            icon={HardDrive}
+            color="orange"
           />
         </div>
       )}
