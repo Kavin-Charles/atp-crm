@@ -127,7 +127,9 @@ export default function DashboardPage() {
                       <td className="px-4 py-3 text-brand-800">{job.company || '—'}</td>
                       <td className="px-4 py-3 text-brand-800 max-w-[180px] truncate" title={job.jobName}>{job.jobName || '—'}</td>
                       <td className="px-4 py-3 text-brand-500">{job.jobOwner || '—'}</td>
-                      <td className="px-4 py-3 text-brand-500">{job.designer || '—'}</td>
+                      <td className="px-4 py-3 text-brand-500">
+                        {Array.isArray(job.designer) ? (job.designer.join(', ') || '—') : (job.designer || '—')}
+                      </td>
                       <td className={`px-4 py-3 whitespace-nowrap font-medium ${over ? 'text-red-600' : 'text-brand-500'}`}>
                         <span>{job.quotedHours ?? '—'}</span>
                         <span className="mx-1 text-slate-300">/</span>

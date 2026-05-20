@@ -300,7 +300,7 @@ export default function JobsPage() {
       company: job.company,
       jobName: job.jobName,
       jobOwner: job.jobOwner,
-      designer: job.designer,
+      designer: Array.isArray(job.designer) ? job.designer : (job.designer ? [job.designer] : []),
       quotedHours: job.quotedHours,
       workedHours: job.workedHours,
       status: job.status,
@@ -380,7 +380,9 @@ export default function JobsPage() {
                     <td className="px-4 py-3 text-slate-700">{job.company || '—'}</td>
                     <td className="px-4 py-3 text-slate-700 max-w-[160px] truncate" title={job.jobName}>{job.jobName || '—'}</td>
                     <td className="px-4 py-3 text-slate-500">{job.jobOwner || '—'}</td>
-                    <td className="px-4 py-3 text-slate-500">{job.designer || '—'}</td>
+                    <td className="px-4 py-3 text-slate-500">
+                      {Array.isArray(job.designer) ? (job.designer.join(', ') || '—') : (job.designer || '—')}
+                    </td>
                     <td className="px-4 py-3 text-slate-500 whitespace-nowrap">
                       <span>{job.quotedHours ?? '—'}</span>
                       <span className="text-slate-300 mx-1">/</span>
@@ -446,11 +448,15 @@ export default function JobsPage() {
                 {users.map((u) => <option key={u._id} value={u.username}>{u.username}</option>)}
               </Select>
             </FormField>
-            <FormField label="Designer" error={errors.designer}>
-              <Select {...register('designer')}>
-                <option value="">Select designer</option>
+            <FormField label="Designers" error={errors.designer}>
+              <select
+                multiple
+                {...register('designer')}
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-900/20 min-h-[90px]"
+              >
                 {users.map((u) => <option key={u._id} value={u.username}>{u.username}</option>)}
-              </Select>
+              </select>
+              <p className="text-xs text-slate-400 mt-1">Hold Ctrl / Cmd to select multiple</p>
             </FormField>
             <FormField label="Quoted Hours" error={errors.quotedHours}>
               <Input type="number" min="0" step="0.5" placeholder="0" {...register('quotedHours')} />

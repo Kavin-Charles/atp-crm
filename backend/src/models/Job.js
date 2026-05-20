@@ -7,7 +7,7 @@ const schema = new mongoose.Schema({
   company:            { type: String, trim: true },
   jobName:            { type: String, trim: true },
   jobOwner:           { type: String, trim: true },
-  designer:           { type: String, trim: true },
+  designer:           { type: [String], default: [] },
   quotedHours:        { type: String },
   workedHours:        { type: String },
   status:             { type: String, enum: ['pending', 'in progress', 'completed', 'on hold', 'cancelled'], default: 'pending' },
