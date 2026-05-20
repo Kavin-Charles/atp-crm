@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Inbox, FileText, Briefcase, CheckCircle, Send, HardDrive } from 'lucide-react';
@@ -9,11 +9,25 @@ import Badge from '@/components/ui/Badge';
 import Spinner from '@/components/ui/Spinner';
 import { formatDate } from '@/lib/utils';
 
+const JOB_STATUSES = ['pending', 'in progress', 'on hold', 'completed', 'cancelled'];
+
 export default function DashboardPage() {
   const { data: stats, isLoading: statsLoading } = useQuery({ queryKey: ['stats'], queryFn: statsApi.get });
   const { data: jobs = [], isLoading: jobsLoading } = useQuery({ queryKey: ['jobs'], queryFn: jobsApi.list });
 
-  const recentJobs = jobs.slice(0, 10);
+  const [statusFilter, setStatusFilter] = useState('in progress');
+
+  // Exclude paid jobs, apply status filter
+  const displayJobs = jobs
+    .filter((j) => j.paymentStatus !== 'received')
+    .filter((j) => statusFilter ? j.status === statusFilter : true)
+    .slice(0, 15);
+
+  function isOverHours(job) {
+    const q = parseFloat(job.quotedHours);
+    const w = parseFloat(job.workedHours);
+    return !isNaN(q) && !isNaN(w) && w > q;
+  }
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -72,13 +86,23 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Recent Jobs */}
+      {/* Jobs table */}
       <div className="card overflow-hidden">
         <div className="px-6 py-4 border-b border-brand-100 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-brand-900">Recent Jobs</h2>
-          <Link to="/jobs" className="text-xs text-brand-500 font-semibold hover:text-brand-700 hover:underline">
-            View all →
-          </Link>
+          <h2 className="text-sm font-semibold text-brand-900">Jobs</h2>
+          <div className="flex items-center gap-3">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="text-xs border border-slate-200 rounded-lg px-3 py-1.5 text-slate-600 bg-white focus:outline-none focus:ring-2 focus:ring-brand-900/20"
+            >
+              <option value="">All statuses</option>
+              {JOB_STATUSES.map((s) => <option key={s} value={s} className="capitalize">{s}</option>)}
+            </select>
+            <Link to="/jobs" className="text-xs text-brand-500 font-semibold hover:text-brand-700 hover:underline">
+              View all →
+            </Link>
+          </div>
         </div>
         {jobsLoading ? (
           <div className="flex justify-center py-10"><Spinner /></div>
@@ -87,7 +111,7 @@ export default function DashboardPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-brand-200 bg-brand-100">
-                  {['ATP #', 'Company', 'Job Name', 'Owner', 'Designer', 'Status', 'Payment'].map((h) => (
+                  {['ATP #', 'Company', 'Job Name', 'Owner', 'Designer', 'Hrs Q/W', 'Started', 'Status', 'Payment'].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-[11px] font-bold text-brand-500 uppercase tracking-widest whitespace-nowrap">
                       {h}
                     </th>
@@ -95,21 +119,32 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-200">
-                {recentJobs.map((job) => (
-                  <tr key={job._id} className="hover:bg-brand-50 transition-colors">
-                    <td className="px-4 py-3 font-mono text-xs font-semibold text-brand-700">{job.atpNumber}</td>
-                    <td className="px-4 py-3 text-brand-800">{job.company || '—'}</td>
-                    <td className="px-4 py-3 text-brand-800 max-w-[180px] truncate">{job.jobName || '—'}</td>
-                    <td className="px-4 py-3 text-brand-500">{job.jobOwner || '—'}</td>
-                    <td className="px-4 py-3 text-brand-500">{job.designer || '—'}</td>
-                    <td className="px-4 py-3"><Badge status={job.status} /></td>
-                    <td className="px-4 py-3"><Badge status={job.paymentStatus} /></td>
-                  </tr>
-                ))}
-                {!recentJobs.length && (
+                {displayJobs.map((job) => {
+                  const over = isOverHours(job);
+                  return (
+                    <tr key={job._id} className={`transition-colors ${over ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-brand-50'}`}>
+                      <td className="px-4 py-3 font-mono text-xs font-semibold text-brand-700">{job.atpNumber}</td>
+                      <td className="px-4 py-3 text-brand-800">{job.company || '—'}</td>
+                      <td className="px-4 py-3 text-brand-800 max-w-[180px] truncate" title={job.jobName}>{job.jobName || '—'}</td>
+                      <td className="px-4 py-3 text-brand-500">{job.jobOwner || '—'}</td>
+                      <td className="px-4 py-3 text-brand-500">{job.designer || '—'}</td>
+                      <td className={`px-4 py-3 whitespace-nowrap font-medium ${over ? 'text-red-600' : 'text-brand-500'}`}>
+                        <span>{job.quotedHours ?? '—'}</span>
+                        <span className="mx-1 text-slate-300">/</span>
+                        <span className={over ? 'text-red-600 font-bold' : ''}>{job.workedHours ?? '—'}</span>
+                      </td>
+                      <td className="px-4 py-3 text-brand-400 whitespace-nowrap text-xs">
+                        {job.startedDate ? formatDate(job.startedDate) : '—'}
+                      </td>
+                      <td className="px-4 py-3"><Badge status={job.status} /></td>
+                      <td className="px-4 py-3"><Badge status={job.paymentStatus} /></td>
+                    </tr>
+                  );
+                })}
+                {!displayJobs.length && (
                   <tr>
-                    <td colSpan={7} className="px-4 py-10 text-center text-brand-400 text-sm">
-                      No jobs yet
+                    <td colSpan={9} className="px-4 py-10 text-center text-brand-400 text-sm">
+                      No jobs {statusFilter ? `with status "${statusFilter}"` : ''}
                     </td>
                   </tr>
                 )}

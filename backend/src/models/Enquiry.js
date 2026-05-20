@@ -5,11 +5,13 @@ const schema = new mongoose.Schema({
   company: { type: String, trim: true },
   phone:   { type: String, trim: true },
   email:   { type: String, trim: true },
-  address: { type: String, trim: true },
-  service: { type: String, trim: true },
-  notes:   { type: String },
-  source:  { type: String, enum: ['referral', 'website', 'cold call', 'email', 'walk-in', 'other', 'manual', 'import'], default: 'manual' },
-  status:  { type: String, enum: ['new', 'contacted', 'quoted', 'converted', 'closed'], default: 'new' },
+  address:    { type: String, trim: true },
+  service:    { type: String, trim: true },
+  notes:      { type: String },
+  source:     { type: String, enum: ['referral', 'website', 'cold call', 'email', 'walk-in', 'other', 'manual', 'import'], default: 'manual' },
+  referredBy: { type: String, trim: true },
+  jobId:      { type: mongoose.Schema.Types.ObjectId, ref: 'Job', default: null },
+  status:     { type: String, enum: ['new', 'contacted', 'quoted', 'converted', 'closed'], default: 'new' },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Enquiry', schema);

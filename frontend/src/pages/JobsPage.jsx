@@ -258,7 +258,7 @@ export default function JobsPage() {
   const [editing, setEditing] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [hoursJob, setHoursJob] = useState(null);
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('in progress');
 
   const { data: jobs = [], isLoading } = useQuery({ queryKey: ['jobs'], queryFn: jobsApi.list });
   const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: usersApi.list });
@@ -308,6 +308,7 @@ export default function JobsPage() {
       paymentMode: job.paymentMode,
       paymentNotes: job.paymentNotes,
       rajFeedback: job.rajFeedback,
+      startedDate: formatDateInput(job.startedDate),
       expectedCompletion: formatDateInput(job.expectedCompletion),
       releaseDate: formatDateInput(job.releaseDate),
       backupDate: formatDateInput(job.backupDate),
@@ -323,6 +324,12 @@ export default function JobsPage() {
 
   const filtered = statusFilter ? jobs.filter((j) => j.status === statusFilter) : jobs;
 
+  function isOverHours(job) {
+    const q = parseFloat(job.quotedHours);
+    const w = parseFloat(job.workedHours);
+    return !isNaN(q) && !isNaN(w) && w > q;
+  }
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <PageHeader
@@ -335,7 +342,7 @@ export default function JobsPage() {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="text-xs border border-slate-200 rounded-lg px-3 py-2 text-slate-600 bg-white focus:outline-none focus:ring-2 focus:ring-brand-900/20"
             >
-              <option value="">All statuses</option>
+              <option value="">All</option>
               {JOB_STATUSES.map((s) => <option key={s} value={s} className="capitalize">{s}</option>)}
             </select>
             <Button onClick={openCreate} size="sm">
@@ -359,7 +366,7 @@ export default function JobsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50">
-                  {['ATP #', 'Company', 'Job Name', 'Owner', 'Designer', 'Hrs Q/W', 'Status', 'Payment', 'Expected', 'Released', 'Backup', 'Actions'].map((h) => (
+                  {['ATP #', 'Company', 'Job Name', 'Owner', 'Designer', 'Hrs Q/W', 'Started', 'Status', 'Payment', 'Expected', 'Released', 'Backup', 'Actions'].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">
                       {h}
                     </th>
@@ -368,7 +375,7 @@ export default function JobsPage() {
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {filtered.map((job) => (
-                  <tr key={job._id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={job._id} className={`hover:bg-slate-50 transition-colors ${isOverHours(job) ? 'bg-red-50' : ''}`}>
                     <td className="px-4 py-3 font-mono text-xs font-semibold text-brand-900 whitespace-nowrap">{job.atpNumber}</td>
                     <td className="px-4 py-3 text-slate-700">{job.company || '—'}</td>
                     <td className="px-4 py-3 text-slate-700 max-w-[160px] truncate" title={job.jobName}>{job.jobName || '—'}</td>
@@ -380,6 +387,9 @@ export default function JobsPage() {
                       <span className={parseFloat(job.workedHours) > parseFloat(job.quotedHours) ? 'text-red-500 font-semibold' : ''}>
                         {job.workedHours ?? '—'}
                       </span>
+                    </td>
+                    <td className="px-4 py-3 text-slate-400 whitespace-nowrap">
+                      {job.startedDate ? formatDate(job.startedDate) : '—'}
                     </td>
                     <td className="px-4 py-3"><Badge status={job.status} /></td>
                     <td className="px-4 py-3"><Badge status={job.paymentStatus} /></td>
@@ -465,6 +475,9 @@ export default function JobsPage() {
                   <option key={s} value={s}>{s}</option>
                 ))}
               </Select>
+            </FormField>
+            <FormField label="Started Date" error={errors.startedDate}>
+              <Input type="date" {...register('startedDate')} />
             </FormField>
             <FormField label="Expected Completion" error={errors.expectedCompletion}>
               <Input type="date" {...register('expectedCompletion')} />

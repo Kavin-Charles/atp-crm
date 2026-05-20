@@ -12,6 +12,7 @@ const schema = new mongoose.Schema({
   workedHours:        { type: String },
   status:             { type: String, enum: ['pending', 'in progress', 'completed', 'on hold', 'cancelled'], default: 'pending' },
   rajFeedback:        { type: String },
+  startedDate:        { type: Date },
   expectedCompletion: { type: Date },
   releaseDate:        { type: Date },
   backupDate:         { type: Date },

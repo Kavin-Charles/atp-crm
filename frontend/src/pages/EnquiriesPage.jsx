@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { Plus, Pencil, Trash2, ArrowRight } from 'lucide-react';
 import { enquiriesApi } from '@/api/enquiries';
 import { quotesApi } from '@/api/quotes';
+import { jobsApi } from '@/api/jobs';
 import { useAuth } from '@/context/AuthContext';
 import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
@@ -21,7 +22,7 @@ import { toast } from 'sonner';
 
 const STATUS_OPTIONS = ['new', 'contacted', 'quoted', 'converted', 'closed'];
 const SOURCE_OPTIONS = ['referral', 'website', 'cold call', 'email', 'walk-in', 'other'];
-const SERVICE_OPTIONS = ['PCB Layout', 'Full Turn Key', 'Debugging', 'Other'];
+const SERVICE_OPTIONS = ['PCB Layout', 'Schematics', 'Full Turn Key', 'Debugging', 'Reengineering', 'Other'];
 
 export default function EnquiriesPage() {
   const { can } = useAuth();
@@ -32,13 +33,16 @@ export default function EnquiriesPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [quoteTarget, setQuoteTarget] = useState(null);
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('');
 
   const { data: enquiries = [], isLoading } = useQuery({
     queryKey: ['enquiries'],
     queryFn: enquiriesApi.list,
   });
+  const { data: jobs = [] } = useQuery({ queryKey: ['jobs'], queryFn: jobsApi.list });
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm();
+  const watchedSource = watch('source');
   const { register: rq, handleSubmit: hsq, reset: resetQ, formState: { errors: eQ } } = useForm();
 
   const saveMutation = useMutation({
@@ -92,6 +96,8 @@ export default function EnquiriesPage() {
       address: enq.address,
       service: enq.service,
       source: enq.source,
+      referredBy: enq.referredBy,
+      jobId: enq.jobId?._id || enq.jobId || '',
       status: enq.status,
       notes: enq.notes,
     });
@@ -122,9 +128,19 @@ export default function EnquiriesPage() {
         title="Enquiries"
         description="Manage incoming customer enquiries"
         action={
-          <Button onClick={openCreate} size="sm">
-            <Plus className="h-4 w-4 mr-1.5" /> New Enquiry
-          </Button>
+          <div className="flex items-center gap-2">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="text-xs border border-slate-200 rounded-lg px-3 py-2 text-slate-600 bg-white focus:outline-none focus:ring-2 focus:ring-brand-900/20"
+            >
+              <option value="">All statuses</option>
+              {STATUS_OPTIONS.map((s) => <option key={s} value={s} className="capitalize">{s}</option>)}
+            </select>
+            <Button onClick={openCreate} size="sm">
+              <Plus className="h-4 w-4 mr-1.5" /> New Enquiry
+            </Button>
+          </div>
         }
       />
 
@@ -142,7 +158,7 @@ export default function EnquiriesPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50">
-                  {['Name', 'Company', 'Service', 'Phone', 'Source', 'Status', 'Date', 'Actions'].map((h) => (
+                  {['Name', 'Company', 'Service', 'Phone', 'Source', 'Job', 'Status', 'Date', 'Actions'].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">
                       {h}
                     </th>
@@ -150,13 +166,21 @@ export default function EnquiriesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {enquiries.map((enq) => (
+                {(statusFilter ? enquiries.filter((e) => e.status === statusFilter) : enquiries).map((enq) => {
+                  const linkedJob = jobs.find((j) => j._id === (enq.jobId?._id || enq.jobId));
+                  return (
                   <tr key={enq._id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3 font-medium text-slate-900">{enq.name || '—'}</td>
                     <td className="px-4 py-3 text-slate-700">{enq.company || '—'}</td>
                     <td className="px-4 py-3 text-slate-500">{enq.service || '—'}</td>
                     <td className="px-4 py-3 text-slate-500">{enq.phone || '—'}</td>
-                    <td className="px-4 py-3 text-slate-500 capitalize">{enq.source || '—'}</td>
+                    <td className="px-4 py-3 text-slate-500 capitalize">
+                      {enq.source || '—'}
+                      {enq.referredBy && <span className="block text-xs text-slate-400">by {enq.referredBy}</span>}
+                    </td>
+                    <td className="px-4 py-3 text-slate-500 whitespace-nowrap font-mono text-xs">
+                      {linkedJob ? `${linkedJob.atpNumber} / ${linkedJob.jobName || ''}` : '—'}
+                    </td>
                     <td className="px-4 py-3"><Badge status={enq.status} /></td>
                     <td className="px-4 py-3 text-slate-400 whitespace-nowrap">{formatDate(enq.createdAt)}</td>
                     <td className="px-4 py-3">
@@ -177,7 +201,8 @@ export default function EnquiriesPage() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -215,6 +240,24 @@ export default function EnquiriesPage() {
               <Select {...register('source')}>
                 <option value="">Select source</option>
                 {SOURCE_OPTIONS.map((s) => <option key={s} value={s} className="capitalize">{s}</option>)}
+              </Select>
+            </FormField>
+            {watchedSource === 'referral' && (
+              <FormField label="Referred By" error={errors.referredBy}>
+                <Input placeholder="Who referred this client?" {...register('referredBy')} />
+              </FormField>
+            )}
+            {watchedSource === 'other' && (
+              <FormField label="Source Details" error={errors.referredBy}>
+                <Input placeholder="Please specify..." {...register('referredBy')} />
+              </FormField>
+            )}
+            <FormField label="Linked Job" error={errors.jobId}>
+              <Select {...register('jobId')}>
+                <option value="">No job linked</option>
+                {jobs.map((j) => (
+                  <option key={j._id} value={j._id}>{j.atpNumber} / {j.jobName || j.company}</option>
+                ))}
               </Select>
             </FormField>
             <FormField label="Status" error={errors.status}>
