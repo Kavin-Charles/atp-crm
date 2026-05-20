@@ -263,7 +263,13 @@ export default function JobsPage() {
   const { data: jobs = [], isLoading } = useQuery({ queryKey: ['jobs'], queryFn: jobsApi.list });
   const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: usersApi.list });
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm();
+
+  const selectedDesigners = watch('designer') || [];
+  function toggleDesigner(username) {
+    const curr = watch('designer') || [];
+    setValue('designer', curr.includes(username) ? curr.filter(d => d !== username) : [...curr, username]);
+  }
 
   const saveMutation = useMutation({
     mutationFn: (data) => editing ? jobsApi.update(editing._id, data) : jobsApi.create(data),
@@ -381,7 +387,7 @@ export default function JobsPage() {
                     <td className="px-4 py-3 text-slate-700 max-w-[160px] truncate" title={job.jobName}>{job.jobName || '—'}</td>
                     <td className="px-4 py-3 text-slate-500">{job.jobOwner || '—'}</td>
                     <td className="px-4 py-3 text-slate-500">
-                      {Array.isArray(job.designer) ? (job.designer.join(', ') || '—') : (job.designer || '—')}
+                      {Array.isArray(job.designer) ? (job.designer.join(' / ') || '—') : (job.designer || '—')}
                     </td>
                     <td className="px-4 py-3 text-slate-500 whitespace-nowrap">
                       <span>{job.quotedHours ?? '—'}</span>
@@ -449,14 +455,28 @@ export default function JobsPage() {
               </Select>
             </FormField>
             <FormField label="Designers" error={errors.designer}>
-              <select
-                multiple
-                {...register('designer')}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-900/20 min-h-[90px]"
-              >
-                {users.map((u) => <option key={u._id} value={u.username}>{u.username}</option>)}
-              </select>
-              <p className="text-xs text-slate-400 mt-1">Hold Ctrl / Cmd to select multiple</p>
+              <input type="hidden" {...register('designer')} />
+              <div className="flex flex-wrap gap-2 p-2 border border-slate-200 rounded-lg min-h-[44px] bg-white">
+                {users.map((u) => {
+                  const active = selectedDesigners.includes(u.username);
+                  return (
+                    <button
+                      key={u._id}
+                      type="button"
+                      onClick={() => toggleDesigner(u.username)}
+                      className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                        active
+                          ? 'bg-brand-900 text-white border-brand-900'
+                          : 'bg-white text-slate-600 border-slate-300 hover:border-brand-900 hover:text-brand-900'
+                      }`}
+                    >
+                      {u.username}
+                    </button>
+                  );
+                })}
+                {users.length === 0 && <span className="text-xs text-slate-400">No users found</span>}
+              </div>
+              <p className="text-xs text-slate-400 mt-1">Click to toggle designers</p>
             </FormField>
             <FormField label="Quoted Hours" error={errors.quotedHours}>
               <Input type="number" min="0" step="0.5" placeholder="0" {...register('quotedHours')} />
