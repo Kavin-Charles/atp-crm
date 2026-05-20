@@ -40,7 +40,13 @@ export default function QuotesPage() {
   const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: usersApi.list });
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
-  const { register: rj, handleSubmit: hsj, reset: resetJ, formState: { errors: eJ } } = useForm();
+  const { register: rj, handleSubmit: hsj, reset: resetJ, watch: watchJ, setValue: setValueJ, formState: { errors: eJ } } = useForm();
+
+  const selectedDesigners = watchJ('designer') || [];
+  function toggleDesigner(username) {
+    const curr = watchJ('designer') || [];
+    setValueJ('designer', curr.includes(username) ? curr.filter(d => d !== username) : [...curr, username]);
+  }
 
   const saveMutation = useMutation({
     mutationFn: (data) => editing ? quotesApi.update(editing._id, data) : quotesApi.create(data),
@@ -113,7 +119,7 @@ export default function QuotesPage() {
       jobName: q.jobName,
       quotedHours: q.quotedHours,
       jobOwner: '',
-      designer: '',
+      designer: [],
       expectedCompletion: '',
     });
     setConvertModalOpen(true);
@@ -249,11 +255,28 @@ export default function QuotesPage() {
                 {staffOptions.map((u) => <option key={u._id} value={u.username}>{u.username}</option>)}
               </Select>
             </FormField>
-            <FormField label="Designer" error={eJ.designer}>
-              <Select {...rj('designer')}>
-                <option value="">Select designer</option>
-                {staffOptions.map((u) => <option key={u._id} value={u.username}>{u.username}</option>)}
-              </Select>
+            <FormField label="Designers" error={eJ.designer}>
+              <input type="hidden" {...rj('designer')} />
+              <div className="flex flex-wrap gap-2 p-2 border border-slate-200 rounded-lg min-h-[44px] bg-white">
+                {staffOptions.map((u) => {
+                  const active = selectedDesigners.includes(u.username);
+                  return (
+                    <button
+                      key={u._id}
+                      type="button"
+                      onClick={() => toggleDesigner(u.username)}
+                      className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                        active
+                          ? 'bg-brand-900 text-white border-brand-900'
+                          : 'bg-white text-slate-600 border-slate-300 hover:border-brand-900 hover:text-brand-900'
+                      }`}
+                    >
+                      {u.username}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-slate-400 mt-1">Click to toggle designers</p>
             </FormField>
             <FormField label="Quoted Hours" error={eJ.quotedHours}>
               <Input type="number" min="0" step="0.5" {...rj('quotedHours')} />
