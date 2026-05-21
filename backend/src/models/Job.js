@@ -20,6 +20,7 @@ const schema = new mongoose.Schema({
   paymentMode:        { type: String, enum: ['bank transfer', 'cheque', 'UPI', 'cash', 'other', ''] },
   paymentNotes:       { type: String },
   remarks:            { type: String },
+  info:               { type: String },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Job', schema);

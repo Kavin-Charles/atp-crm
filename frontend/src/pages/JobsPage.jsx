@@ -293,6 +293,13 @@ function JobDetailModal({ job, open, onClose, onEdit, onHours, canEdit }) {
           {field('Backup', formatDate(job.backupDate))}
         </div>
 
+        {job.info && (
+          <div>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Info</p>
+            <p className="text-sm text-slate-700 bg-slate-50 rounded-lg p-3 whitespace-pre-wrap">{job.info}</p>
+          </div>
+        )}
+
         {job.remarks && (
           <div>
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Remarks</p>
@@ -402,6 +409,7 @@ export default function JobsPage() {
       paymentNotes: job.paymentNotes,
       rajFeedback: job.rajFeedback,
       remarks: job.remarks,
+      info: job.info,
       startedDate: formatDateInput(job.startedDate),
       expectedCompletion: formatDateInput(job.expectedCompletion),
       releaseDate: formatDateInput(job.releaseDate),
@@ -605,6 +613,11 @@ export default function JobsPage() {
             <FormField label="Backup Date" error={errors.backupDate}>
               <Input type="date" {...register('backupDate')} />
             </FormField>
+            <div className="col-span-2">
+              <FormField label="Info" error={errors.info}>
+                <Textarea placeholder="Job info / status notes..." rows={2} {...register('info')} />
+              </FormField>
+            </div>
             <div className="col-span-2">
               <FormField label="Remarks" error={errors.remarks}>
                 <Textarea placeholder="Progress notes, status updates..." rows={2} {...register('remarks')} />
