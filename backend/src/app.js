@@ -12,6 +12,7 @@ const jobRoutes = require('./routes/jobs');
 const hoursRoutes = require('./routes/hours');
 const statsRoutes = require('./routes/stats');
 const dataRoutes = require('./routes/data');
+const importDatesRoutes = require('./routes/importDates');
 
 const app = express();
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/atp_crm';
@@ -45,6 +46,7 @@ app.use('/api/jobs', jobRoutes);
 app.use('/api/hours', hoursRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/data', dataRoutes);
+app.use('/api/import-dates', importDatesRoutes);
 
 if (isProd) {
   const distPath = path.join(__dirname, '../../frontend/dist');
