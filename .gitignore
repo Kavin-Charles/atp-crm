@@ -4,3 +4,14 @@ frontend/dist/
 *.log
 .DS_Store
 refs/
+# one-off scripts (may contain credentials)
+import_jobs.py
+migrate_pending.py
+deploy.py
+check_vm*.py
+debug_vm.py
+fix_deploy.py
+start_vm.py
+restart_vm.py
+setup_env.py
+*_vm.py
