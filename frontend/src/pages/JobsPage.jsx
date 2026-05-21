@@ -378,7 +378,7 @@ export default function JobsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50">
-                  {['ATP #', 'Company', 'Job Name', 'Owner', 'Designer', 'Hrs Q/W', 'Started', 'Status', 'Payment', 'Expected', 'Released', 'Backup', 'Remarks', 'Actions'].map((h) => (
+                  {['ATP #', 'Company', 'Job Name', 'Owner', 'Designer', 'Hrs Q/W', 'Started', 'Status', 'Payment', 'Expected', 'Released', 'Backup', 'Remarks', 'Feedback', 'Actions'].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">
                       {h}
                     </th>
@@ -418,6 +418,9 @@ export default function JobsPage() {
                     </td>
                     <td className="px-4 py-3 text-slate-500 max-w-[200px] truncate" title={job.remarks}>
                       {job.remarks || '—'}
+                    </td>
+                    <td className="px-4 py-3 text-slate-500 max-w-[160px] truncate" title={job.rajFeedback}>
+                      {job.rajFeedback || '—'}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
