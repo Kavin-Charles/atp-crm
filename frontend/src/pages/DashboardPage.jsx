@@ -9,7 +9,7 @@ import Badge from '@/components/ui/Badge';
 import Spinner from '@/components/ui/Spinner';
 import { formatDate } from '@/lib/utils';
 
-const JOB_STATUSES = ['pending', 'in progress', 'on hold', 'completed', 'cancelled'];
+const JOB_STATUSES = ['in progress', 'on hold', 'completed', 'cancelled'];
 
 export default function DashboardPage() {
   const { data: stats, isLoading: statsLoading } = useQuery({ queryKey: ['stats'], queryFn: statsApi.get });
@@ -45,6 +45,7 @@ export default function DashboardPage() {
             label="Total Enquiries"
             value={stats?.enquiries.total}
             sub={`${stats?.enquiries.new} new`}
+            subLink="/enquiries?status=new"
             icon={Inbox}
             color="brand"
           />

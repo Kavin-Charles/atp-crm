@@ -10,7 +10,7 @@ const schema = new mongoose.Schema({
   designer:           { type: [String], default: [] },
   quotedHours:        { type: String },
   workedHours:        { type: String },
-  status:             { type: String, enum: ['pending', 'in progress', 'completed', 'on hold', 'cancelled'], default: 'pending' },
+  status:             { type: String, enum: ['in progress', 'completed', 'on hold', 'cancelled'], default: 'in progress' },
   rajFeedback:        { type: String },
   startedDate:        { type: Date },
   expectedCompletion: { type: Date },

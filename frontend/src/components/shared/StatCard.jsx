@@ -1,6 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
-export default function StatCard({ label, value, sub, icon: Icon, color = 'brand' }) {
+export default function StatCard({ label, value, sub, subLink, icon: Icon, color = 'brand' }) {
   const iconColors = {
     brand:  { bg: 'oklch(96.5% 0.015 75)',       color: 'oklch(38% 0.09 55)'  },
     green:  { bg: 'oklch(94% 0.06 150 / 0.18)',  color: 'oklch(35% 0.1 150)'  },
@@ -18,7 +19,10 @@ export default function StatCard({ label, value, sub, icon: Icon, color = 'brand
       <div className="flex-1 min-w-0">
         <p className="text-xs font-semibold text-brand-400 uppercase tracking-wide">{label}</p>
         <p className="text-[28px] font-extrabold text-brand-900 tracking-[-0.04em] leading-none mt-1">{value ?? '—'}</p>
-        {sub && <p className="text-xs text-brand-400 mt-1">{sub}</p>}
+        {sub && (subLink
+          ? <Link to={subLink} className="text-xs text-brand-400 mt-1 hover:text-brand-700 hover:underline block">{sub}</Link>
+          : <p className="text-xs text-brand-400 mt-1">{sub}</p>
+        )}
       </div>
     </div>
   );

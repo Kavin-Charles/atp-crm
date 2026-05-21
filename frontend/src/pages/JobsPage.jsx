@@ -20,7 +20,7 @@ import Dialog, { DialogBody, DialogFooter } from '@/components/ui/Dialog';
 import { formatDate, formatDateInput } from '@/lib/utils';
 import { toast } from 'sonner';
 
-const JOB_STATUSES = ['pending', 'in progress', 'on hold', 'completed', 'cancelled'];
+const JOB_STATUSES = ['in progress', 'on hold', 'completed', 'cancelled'];
 const PAYMENT_STATUSES = ['pending', 'partial', 'received'];
 
 // ─── Hours sub-modal ────────────────────────────────────────────────────────

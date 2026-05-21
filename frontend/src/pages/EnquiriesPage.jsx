@@ -17,6 +17,7 @@ import Select from '@/components/ui/Select';
 import Textarea from '@/components/ui/Textarea';
 import Spinner from '@/components/ui/Spinner';
 import Dialog, { DialogBody, DialogFooter } from '@/components/ui/Dialog';
+import { useSearchParams } from 'react-router-dom';
 import { formatDate } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -33,7 +34,8 @@ export default function EnquiriesPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [quoteTarget, setQuoteTarget] = useState(null);
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState('');
+  const [searchParams] = useSearchParams();
+  const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || '');
 
   const { data: enquiries = [], isLoading } = useQuery({
     queryKey: ['enquiries'],
