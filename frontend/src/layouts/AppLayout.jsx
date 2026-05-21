@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 
 const NAV_ITEMS = [
   { label: 'Dashboard',   icon: LayoutDashboard, path: '/',          exact: true },
-  { label: 'Enquiries',   icon: Inbox,            path: '/enquiries'              },
+  { label: 'Enquiries',   icon: Inbox,            path: '/enquiries', roles: ['admin', 'manager'] },
   { label: 'Quotes',      icon: FileText,         path: '/quotes',   roles: ['admin', 'manager'] },
   { label: 'Jobs',        icon: Briefcase,        path: '/jobs'                   },
   { label: 'Import',      icon: Upload,           path: '/import',   roles: ['admin', 'manager'] },

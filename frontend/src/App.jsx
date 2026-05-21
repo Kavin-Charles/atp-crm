@@ -29,7 +29,7 @@ function AppRoutes() {
       <Route path="/login" element={user ? <Navigate to="/" replace /> : <LoginPage />} />
       <Route path="/" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
         <Route index element={<DashboardPage />} />
-        <Route path="enquiries" element={<EnquiriesPage />} />
+        <Route path="enquiries" element={<ProtectedRoute roles={['admin', 'manager']}><EnquiriesPage /></ProtectedRoute>} />
         <Route path="quotes" element={<ProtectedRoute roles={['admin', 'manager']}><QuotesPage /></ProtectedRoute>} />
         <Route path="jobs" element={<JobsPage />} />
         <Route path="import" element={<ProtectedRoute roles={['admin', 'manager']}><ImportPage /></ProtectedRoute>} />
