@@ -248,6 +248,87 @@ function HoursModal({ job, open, onClose }) {
   );
 }
 
+// ─── Job detail modal ────────────────────────────────────────────────────────
+
+function JobDetailModal({ job, open, onClose, onEdit, onHours, canEdit }) {
+  if (!job) return null;
+  const field = (label, value) => (
+    <div>
+      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">{label}</p>
+      <p className="text-sm text-slate-800">{value || '—'}</p>
+    </div>
+  );
+  const isOver = parseFloat(job.workedHours) > parseFloat(job.quotedHours);
+  return (
+    <Dialog open={open} onClose={onClose} title={`${job.atpNumber} — ${job.jobName || ''}`} size="lg">
+      <DialogBody className="space-y-5">
+        {/* Header row */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <Badge status={job.status} />
+          <Badge status={job.paymentStatus} />
+          {isOver && <span className="text-xs font-semibold text-red-500 bg-red-50 px-2 py-0.5 rounded-full">Over hours</span>}
+        </div>
+
+        {/* Main details */}
+        <div className="grid grid-cols-2 gap-4">
+          {field('Client', job.clientName)}
+          {field('Company', job.company)}
+          {field('Job Owner', job.jobOwner)}
+          {field('Designer(s)', Array.isArray(job.designer) ? job.designer.join(' / ') : job.designer)}
+        </div>
+
+        <div className="grid grid-cols-3 gap-4">
+          {field('Quoted Hours', job.quotedHours)}
+          <div>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Worked Hours</p>
+            <p className={`text-sm font-semibold ${isOver ? 'text-red-500' : 'text-slate-800'}`}>{job.workedHours ?? '—'}</p>
+          </div>
+          {field('Payment Mode', job.paymentMode)}
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {field('Started', formatDate(job.startedDate))}
+          {field('Expected', formatDate(job.expectedCompletion))}
+          {field('Released', formatDate(job.releaseDate))}
+          {field('Backup', formatDate(job.backupDate))}
+        </div>
+
+        {job.remarks && (
+          <div>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Remarks</p>
+            <p className="text-sm text-slate-700 bg-slate-50 rounded-lg p-3 whitespace-pre-wrap">{job.remarks}</p>
+          </div>
+        )}
+
+        {job.rajFeedback && (
+          <div>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Manager Feedback</p>
+            <p className="text-sm text-slate-700 bg-amber-50 rounded-lg p-3 whitespace-pre-wrap">{job.rajFeedback}</p>
+          </div>
+        )}
+
+        {job.paymentNotes && (
+          <div>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Payment Notes</p>
+            <p className="text-sm text-slate-700 bg-slate-50 rounded-lg p-3 whitespace-pre-wrap">{job.paymentNotes}</p>
+          </div>
+        )}
+      </DialogBody>
+      <DialogFooter>
+        <Button variant="secondary" onClick={onClose}>Close</Button>
+        <Button variant="secondary" onClick={() => { onClose(); onHours(); }}>
+          <Clock className="h-4 w-4 mr-1.5" /> Hours
+        </Button>
+        {canEdit && (
+          <Button onClick={() => { onClose(); onEdit(); }}>
+            <Pencil className="h-4 w-4 mr-1.5" /> Edit
+          </Button>
+        )}
+      </DialogFooter>
+    </Dialog>
+  );
+}
+
 // ─── Jobs page ───────────────────────────────────────────────────────────────
 
 export default function JobsPage() {
@@ -258,6 +339,7 @@ export default function JobsPage() {
   const [editing, setEditing] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [hoursJob, setHoursJob] = useState(null);
+  const [viewJob, setViewJob] = useState(null);
   const [statusFilter, setStatusFilter] = useState('in progress');
 
   const { data: jobs = [], isLoading } = useQuery({ queryKey: ['jobs'], queryFn: jobsApi.list });
@@ -387,7 +469,7 @@ export default function JobsPage() {
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {filtered.map((job) => (
-                  <tr key={job._id} className={`hover:bg-slate-50 transition-colors ${isOverHours(job) ? 'bg-red-50' : ''}`}>
+                  <tr key={job._id} onClick={() => setViewJob(job)} className={`hover:bg-slate-50 transition-colors cursor-pointer ${isOverHours(job) ? 'bg-red-50 hover:bg-red-100' : ''}`}>
                     <td className="px-4 py-3 font-mono text-xs font-semibold text-brand-900 whitespace-nowrap">{job.atpNumber}</td>
                     <td className="px-4 py-3 text-slate-700">{job.company || '—'}</td>
                     <td className="px-4 py-3 text-slate-700 max-w-[160px] truncate" title={job.jobName}>{job.jobName || '—'}</td>
@@ -419,7 +501,7 @@ export default function JobsPage() {
                     <td className="px-4 py-3 text-slate-500 max-w-[160px] truncate" title={job.rajFeedback}>
                       {job.rajFeedback || '—'}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center gap-1">
                         <Button variant="ghost" size="sm" onClick={() => setHoursJob(job)} title="View Hours">
                           <Clock className="h-3.5 w-3.5 text-slate-400" />
@@ -547,6 +629,16 @@ export default function JobsPage() {
           </DialogFooter>
         </form>
       </Dialog>
+
+      {/* Job detail modal */}
+      <JobDetailModal
+        job={viewJob}
+        open={!!viewJob}
+        onClose={() => setViewJob(null)}
+        onEdit={() => openEdit(viewJob)}
+        onHours={() => setHoursJob(viewJob)}
+        canEdit={can('admin', 'manager')}
+      />
 
       {/* Hours modal */}
       <HoursModal job={hoursJob} open={!!hoursJob} onClose={() => setHoursJob(null)} />
