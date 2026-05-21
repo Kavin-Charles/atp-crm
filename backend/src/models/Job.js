@@ -19,7 +19,6 @@ const schema = new mongoose.Schema({
   paymentStatus:      { type: String, enum: ['pending', 'partial', 'received'], default: 'pending' },
   paymentMode:        { type: String, enum: ['bank transfer', 'cheque', 'UPI', 'cash', 'other', ''] },
   paymentNotes:       { type: String },
-  remarks:            { type: String },
   info:               { type: String },
 }, { timestamps: true });
 

@@ -300,13 +300,6 @@ function JobDetailModal({ job, open, onClose, onEdit, onHours, canEdit }) {
           </div>
         )}
 
-        {job.remarks && (
-          <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Remarks</p>
-            <p className="text-sm text-slate-700 bg-slate-50 rounded-lg p-3 whitespace-pre-wrap">{job.remarks}</p>
-          </div>
-        )}
-
         {job.rajFeedback && (
           <div>
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Manager Feedback</p>
@@ -408,7 +401,6 @@ export default function JobsPage() {
       paymentMode: job.paymentMode,
       paymentNotes: job.paymentNotes,
       rajFeedback: job.rajFeedback,
-      remarks: job.remarks,
       info: job.info,
       startedDate: formatDateInput(job.startedDate),
       expectedCompletion: formatDateInput(job.expectedCompletion),
@@ -616,11 +608,6 @@ export default function JobsPage() {
             <div className="col-span-2">
               <FormField label="Info" error={errors.info}>
                 <Textarea placeholder="Job info / status notes..." rows={2} {...register('info')} />
-              </FormField>
-            </div>
-            <div className="col-span-2">
-              <FormField label="Remarks" error={errors.remarks}>
-                <Textarea placeholder="Progress notes, status updates..." rows={2} {...register('remarks')} />
               </FormField>
             </div>
             <div className="col-span-2">
