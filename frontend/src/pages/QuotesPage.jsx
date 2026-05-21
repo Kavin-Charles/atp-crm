@@ -71,7 +71,12 @@ export default function QuotesPage() {
   });
 
   const convertMutation = useMutation({
-    mutationFn: jobsApi.create,
+    mutationFn: (data) => {
+      const clean = { ...data };
+      ['expectedCompletion', 'startedDate'].forEach(k => { if (!clean[k]) delete clean[k]; });
+      if (!clean.jobOwner) delete clean.jobOwner;
+      return jobsApi.create(clean);
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['quotes'] });
       qc.invalidateQueries({ queryKey: ['jobs'] });

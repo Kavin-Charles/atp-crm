@@ -46,7 +46,13 @@ export default function EnquiriesPage() {
   const { register: rq, handleSubmit: hsq, reset: resetQ, formState: { errors: eQ } } = useForm();
 
   const saveMutation = useMutation({
-    mutationFn: (data) => editing ? enquiriesApi.update(editing._id, data) : enquiriesApi.create(data),
+    mutationFn: (data) => {
+      const clean = { ...data };
+      if (!clean.jobId) delete clean.jobId;
+      if (!clean.source) delete clean.source;
+      if (!clean.referredBy) delete clean.referredBy;
+      return editing ? enquiriesApi.update(editing._id, clean) : enquiriesApi.create(clean);
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['enquiries'] });
       qc.invalidateQueries({ queryKey: ['stats'] });

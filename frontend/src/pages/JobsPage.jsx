@@ -272,7 +272,12 @@ export default function JobsPage() {
   }
 
   const saveMutation = useMutation({
-    mutationFn: (data) => editing ? jobsApi.update(editing._id, data) : jobsApi.create(data),
+    mutationFn: (data) => {
+      const clean = { ...data };
+      ['startedDate', 'expectedCompletion', 'releaseDate', 'backupDate'].forEach(k => { if (!clean[k]) delete clean[k]; });
+      if (!clean.paymentMode) delete clean.paymentMode;
+      return editing ? jobsApi.update(editing._id, clean) : jobsApi.create(clean);
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['jobs'] });
       qc.invalidateQueries({ queryKey: ['stats'] });
