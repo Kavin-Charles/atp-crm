@@ -8,27 +8,31 @@ from io import StringIO
 
 GCP_KEY_FILE = r"C:\Users\kavin\Documents\GCP Service Key.json"
 PROJECT = "stone-outpost-472905-f8"
-ZONE = "us-west1-b"
+ZONE = "us-central1-f"
 INSTANCE = "tracetech-instance"
 VM_IP = "35.255.224.61"
 VM_USER = "kavin"
 LOCAL_KEY = r"D:\Projects\atp-crm\.claude\worktrees\hungry-feynman-e50d10\gcp_vm_id_rsa"
 
+APP_DIR = "/home/kavin_charles/atp-crm"
 COMMANDS = [
-    "export NVM_DIR=\"$HOME/.nvm\" && . \"$NVM_DIR/nvm.sh\" && nvm use 20 > /dev/null 2>&1 && cd /home/kavin/atp-crm && git pull origin main 2>&1 | tail -5",
-    "export NVM_DIR=\"$HOME/.nvm\" && . \"$NVM_DIR/nvm.sh\" && nvm use 20 > /dev/null 2>&1 && cd /home/kavin/atp-crm && npm run build 2>&1 | tail -10",
-    "fuser -k 3001/tcp 2>/dev/null; sleep 1; true",
-    "export NVM_DIR=\"$HOME/.nvm\" && . \"$NVM_DIR/nvm.sh\" && nvm use 20 > /dev/null 2>&1 && cd /home/kavin/atp-crm && nohup npm start </dev/null >/tmp/atp-crm.log 2>&1 & sleep 3 && echo STARTED",
+    f"sudo git config --global --add safe.directory {APP_DIR}; sudo -u kavin_charles git -C {APP_DIR} pull origin master 2>&1 | tail -5",
+    f"sudo -u kavin_charles bash -c 'cd {APP_DIR}/backend && npm install' 2>&1 | tail -3",
+    f"sudo -u kavin_charles bash -c 'cd {APP_DIR}/frontend && npm install' 2>&1 | tail -3",
+    f"sudo -u kavin_charles bash -c 'cd {APP_DIR} && npm run build' 2>&1 | tail -5",
+    "sudo fuser -k 3001/tcp 2>/dev/null; sleep 2; true",
+    f"cd {APP_DIR} && sudo -u kavin_charles nohup npm start </dev/null >/tmp/atp-crm.log 2>&1 & sleep 4 && echo STARTED && cat /tmp/atp-crm.log | tail -3",
 ]
 
 def get_access_token():
     with open(GCP_KEY_FILE) as f:
         key = json.load(f)
     import google.oauth2.service_account as sa
+    import google.auth.transport.requests as gatr
     creds = sa.Credentials.from_service_account_info(
         key, scopes=["https://www.googleapis.com/auth/cloud-platform"]
     )
-    creds.refresh(requests.Request())
+    creds.refresh(gatr.Request())
     return creds.token
 
 def inject_pubkey(pubkey_str):
@@ -53,7 +57,7 @@ def inject_pubkey(pubkey_str):
     else:
         items.append({"key": "ssh-keys", "value": entry})
         meta["items"] = items
-    patch = {"metadata": {"fingerprint": meta.get("fingerprint", ""), "items": items}}
+    patch = {"fingerprint": meta.get("fingerprint", ""), "items": items}
     url2 = url + "/setMetadata"
     r2 = requests.post(url2, headers=headers, json=patch)
     r2.raise_for_status()
@@ -86,8 +90,8 @@ def run_deploy():
         stdin, stdout, stderr = ssh.exec_command(cmd, timeout=120)
         out = stdout.read().decode()
         err = stderr.read().decode()
-        if out: print(out.strip())
-        if err: print("STDERR:", err.strip()[:200])
+        if out: print(out.strip().encode('ascii', 'replace').decode())
+        if err: print("STDERR:", err.strip()[:200].encode('ascii', 'replace').decode())
 
     ssh.close()
     print("\nDone. Site: http://35.255.224.61")

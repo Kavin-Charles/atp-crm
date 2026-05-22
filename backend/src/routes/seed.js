@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Job  = require('../models/Job');
 const Quote = require('../models/Quote');
+const CalendarEvent = require('../models/CalendarEvent');
 
 async function seedDatabase() {
   const adminExists = await User.findOne({ username: 'admin' });
@@ -49,4 +50,31 @@ async function seedDatabase() {
   console.log('✓ Sample data seeded');
 }
 
-module.exports = { seedDatabase };
+async function seedHolidays() {
+  const exists = await CalendarEvent.findOne({ type: 'holiday', date: '2026-01-26' });
+  if (exists) return;
+  const holidays = [
+    { title: 'Republic Day',          date: '2026-01-26', type: 'holiday' },
+    { title: 'Tamil New Year',        date: '2026-04-14', type: 'holiday' },
+    { title: 'May Day',               date: '2026-05-01', type: 'holiday' },
+    { title: 'USA Holiday',           date: '2026-05-23', type: 'holiday' },
+    { title: 'Independence Day',      date: '2026-08-15', type: 'holiday' },
+    { title: 'USA Holiday',           date: '2026-09-07', type: 'holiday' },
+    { title: 'Vinayagar Chathurthi',  date: '2026-09-14', type: 'holiday' },
+    { title: 'Gandhi Jayanthi',       date: '2026-10-02', type: 'holiday' },
+    { title: 'Navarathiri (Optional)',date: '2026-10-16', type: 'holiday', description: 'Few people take day off' },
+    { title: 'Deepavali',             date: '2026-11-06', type: 'holiday' },
+    { title: 'Deepavali',             date: '2026-11-07', type: 'holiday' },
+    { title: 'Deepavali',             date: '2026-11-08', type: 'holiday' },
+    { title: 'Thanksgiving',          date: '2026-11-27', type: 'holiday' },
+    { title: 'Thanksgiving',          date: '2026-11-28', type: 'holiday' },
+    { title: 'Thanksgiving',          date: '2026-11-29', type: 'holiday' },
+    { title: 'Christmas',             date: '2026-12-25', type: 'holiday' },
+    { title: 'Christmas',             date: '2026-12-26', type: 'holiday' },
+    { title: 'New Year',              date: '2027-01-01', type: 'holiday' },
+  ];
+  await CalendarEvent.insertMany(holidays);
+  console.log('✓ Holidays seeded');
+}
+
+module.exports = { seedDatabase, seedHolidays };

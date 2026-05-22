@@ -3,7 +3,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Inbox, FileText, Briefcase,
   Upload, Database, Users, LogOut,
-  ChevronLeft, ChevronRight, KeyRound,
+  ChevronLeft, ChevronRight, KeyRound, CalendarDays, CheckSquare,
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '@/context/AuthContext';
@@ -19,6 +19,8 @@ const NAV_ITEMS = [
   { label: 'Enquiries',   icon: Inbox,            path: '/enquiries', roles: ['admin', 'manager'] },
   { label: 'Quotes',      icon: FileText,         path: '/quotes',   roles: ['admin', 'manager'] },
   { label: 'Jobs',        icon: Briefcase,        path: '/jobs'                   },
+  { label: 'Calendar',    icon: CalendarDays,     path: '/calendar'               },
+  { label: 'Tasks',       icon: CheckSquare,      path: '/tasks'                  },
   { label: 'Import',      icon: Upload,           path: '/import',   roles: ['admin', 'manager'] },
   { label: 'Data Viewer', icon: Database,         path: '/data',     roles: ['admin'] },
   { label: 'Users',       icon: Users,            path: '/users',    roles: ['admin'] },

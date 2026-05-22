@@ -10,6 +10,8 @@ import JobsPage from '@/pages/JobsPage';
 import ImportPage from '@/pages/ImportPage';
 import DataViewerPage from '@/pages/DataViewerPage';
 import UsersPage from '@/pages/UsersPage';
+import CalendarPage from '@/pages/CalendarPage';
+import TasksPage from '@/pages/TasksPage';
 import Spinner from '@/components/ui/Spinner';
 
 function ProtectedRoute({ children, roles }) {
@@ -35,6 +37,8 @@ function AppRoutes() {
         <Route path="import" element={<ProtectedRoute roles={['admin', 'manager']}><ImportPage /></ProtectedRoute>} />
         <Route path="data" element={<ProtectedRoute roles={['admin']}><DataViewerPage /></ProtectedRoute>} />
         <Route path="users" element={<ProtectedRoute roles={['admin']}><UsersPage /></ProtectedRoute>} />
+        <Route path="calendar" element={<CalendarPage />} />
+        <Route path="tasks" element={<TasksPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

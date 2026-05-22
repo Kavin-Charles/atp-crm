@@ -1,0 +1,10 @@
+import pandas as pd
+df = pd.read_excel('D:/Projects/atp-crm/JOBLIST2026.xlsx', sheet_name='JOBLIST_2026')
+print('Shape:', df.shape)
+print('Cols:', list(df.columns))
+print(df[['ATP ', 'Release Date', 'Backup date']].dropna(subset=['ATP ']).head(20).to_string())
+print('\nRelease Date samples:', df['Release Date'].dropna().head(10).tolist())
+print('Backup date samples:', df['Backup date'].dropna().head(10).tolist())
+print('Total rows with ATP:', df['ATP '].notna().sum())
+print('Rows with releaseDate:', df['Release Date'].notna().sum())
+print('Rows with backupDate:', df['Backup date'].notna().sum())
