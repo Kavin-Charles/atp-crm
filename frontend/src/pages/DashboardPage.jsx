@@ -20,10 +20,10 @@ export default function DashboardPage() {
   const [statusFilter, setStatusFilter] = useState('in progress');
 
   // Exclude paid jobs, apply status filter
-  const displayJobs = jobs
+  const filteredJobs = jobs
     .filter((j) => j.paymentStatus !== 'received')
-    .filter((j) => statusFilter ? j.status === statusFilter : true)
-    .slice(0, 15);
+    .filter((j) => statusFilter ? j.status === statusFilter : true);
+  const displayJobs = filteredJobs.slice(0, 5);
 
   function isOverHours(job) {
     const q = parseFloat(job.quotedHours);
@@ -89,8 +89,8 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Bottom split: Jobs (left) + Tasks (right) */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      {/* Jobs + Tasks stacked */}
+      <div className="space-y-6">
 
         {/* Jobs table */}
         <div className="card overflow-hidden">
@@ -158,6 +158,13 @@ export default function DashboardPage() {
                   )}
                 </tbody>
               </table>
+            </div>
+          )}
+          {filteredJobs.length > 5 && (
+            <div className="px-6 py-3 border-t border-brand-100 text-center">
+              <Link to="/jobs" className="text-xs text-brand-500 font-semibold hover:text-brand-700 hover:underline">
+                View all {filteredJobs.length} jobs →
+              </Link>
             </div>
           )}
         </div>
