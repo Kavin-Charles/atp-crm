@@ -6,7 +6,11 @@ const { generateAtpNumber } = require('../utils/atpNumber');
 
 router.get('/', requireAuth, async (req, res, next) => {
   try {
-    res.json(await Job.find().sort({ createdAt: -1 }));
+    const { role, username } = req.session;
+    const filter = (role === 'admin' || role === 'manager')
+      ? {}
+      : { $or: [{ designer: username }, { jobOwner: username }] };
+    res.json(await Job.find(filter).sort({ createdAt: -1 }));
   } catch (err) { next(err); }
 });
 
