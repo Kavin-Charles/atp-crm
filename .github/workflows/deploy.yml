@@ -36,6 +36,9 @@ jobs:
             echo "Restarting backend server..."
             sudo fuser -k 3001/tcp 2>/dev/null || true
             sleep 2
-            sudo -u kavin_charles bash -c "cd $APP_DIR && (nohup npm start </dev/null >/tmp/atp-crm.log 2>&1 &)"
+            sudo -u kavin_charles bash -c "cd $APP_DIR/backend && (nohup node server.js </dev/null >/tmp/atp-crm.log 2>&1 &)"
+            sleep 5
+            echo "Backend Logs:"
+            cat /tmp/atp-crm.log
             
             echo "Deployment triggered successfully!"
