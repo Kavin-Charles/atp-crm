@@ -52,8 +52,14 @@ app.use('/api/tasks', tasksRoutes);
 
 if (isProd) {
   const distPath = path.join(__dirname, '../../frontend/dist');
-  app.use(express.static(distPath));
-  app.get('*', (req, res) => res.sendFile(path.join(distPath, 'index.html')));
+  app.use(express.static(distPath, { maxAge: '1y' }));
+  app.get('*', (req, res) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('Surrogate-Control', 'no-store');
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
 }
 
 app.use((err, req, res, next) => {
