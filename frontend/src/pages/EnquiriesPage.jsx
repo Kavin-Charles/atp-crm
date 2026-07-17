@@ -35,7 +35,7 @@ export default function EnquiriesPage() {
   const [quoteTarget, setQuoteTarget] = useState(null);
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
   const [searchParams] = useSearchParams();
-  const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || '');
+  const [statusFilter, setStatusFilter] = useState(searchParams.get('status') ?? 'new');
 
   const { data: enquiries = [], isLoading } = useQuery({
     queryKey: ['enquiries'],
