@@ -77,7 +77,7 @@ export default function DashboardPage() {
                   <tr>
                     <th className="py-2.5 px-4">Client Name</th>
                     <th className="py-2.5 px-4">Company</th>
-                    <th className="py-2.5 px-4">Job Name</th>
+                    <th className="py-2.5 px-4">Service</th>
                     <th className="py-2.5 px-4">Status</th>
                     <th className="py-2.5 px-4">Date</th>
                   </tr>
@@ -85,9 +85,9 @@ export default function DashboardPage() {
                 <tbody className="divide-y divide-brand-100">
                   {top5Enquiries.map((enq) => (
                     <tr key={enq._id} className="hover:bg-brand-50/40 transition-colors">
-                      <td className="py-3 px-4 font-medium text-brand-900">{enq.clientName || '—'}</td>
+                      <td className="py-3 px-4 font-medium text-brand-900">{enq.name || enq.clientName || '—'}</td>
                       <td className="py-3 px-4 text-brand-600">{enq.company || '—'}</td>
-                      <td className="py-3 px-4 text-brand-800 font-medium">{enq.jobName || '—'}</td>
+                      <td className="py-3 px-4 text-brand-800 font-medium">{enq.service || '—'}</td>
                       <td className="py-3 px-4"><Badge status={enq.status} /></td>
                       <td className="py-3 px-4 text-xs text-brand-500 font-mono">
                         {enq.createdAt ? format(new Date(enq.createdAt), 'dd MMM yyyy') : '—'}
