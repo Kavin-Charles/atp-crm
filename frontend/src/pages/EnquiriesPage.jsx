@@ -31,6 +31,7 @@ export default function EnquiriesPage() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [viewEnquiry, setViewEnquiry] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [quoteTarget, setQuoteTarget] = useState(null);
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
@@ -177,7 +178,7 @@ export default function EnquiriesPage() {
                 {(statusFilter ? enquiries.filter((e) => e.status === statusFilter) : enquiries).map((enq) => {
                   const linkedJob = jobs.find((j) => j._id === (enq.jobId?._id || enq.jobId));
                   return (
-                  <tr key={enq._id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={enq._id} onClick={() => setViewEnquiry(enq)} className="hover:bg-slate-50 transition-colors cursor-pointer">
                     <td className="px-4 py-3 font-medium text-slate-900">{enq.name || '—'}</td>
                     <td className="px-4 py-3 text-slate-700">{enq.company || '—'}</td>
                     <td className="px-4 py-3 text-slate-500">{enq.service || '—'}</td>
@@ -191,7 +192,7 @@ export default function EnquiriesPage() {
                     </td>
                     <td className="px-4 py-3"><Badge status={enq.status} /></td>
                     <td className="px-4 py-3 text-slate-400 whitespace-nowrap">{formatDate(enq.createdAt)}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center gap-1">
                         {enq.status !== 'quoted' && enq.status !== 'converted' && (
                           <Button variant="ghost" size="sm" onClick={() => openQuote(enq)} title="Make Quote">
@@ -322,6 +323,16 @@ export default function EnquiriesPage() {
         </form>
       </Dialog>
 
+      {/* View Enquiry Detail Modal */}
+      <EnquiryDetailModal
+        enquiry={viewEnquiry}
+        open={!!viewEnquiry}
+        onClose={() => setViewEnquiry(null)}
+        onEdit={() => openEdit(viewEnquiry)}
+        onQuote={() => openQuote(viewEnquiry)}
+        jobs={jobs}
+      />
+
       <ConfirmDialog
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
@@ -331,5 +342,73 @@ export default function EnquiriesPage() {
         description={`Delete enquiry from "${deleteTarget?.name || deleteTarget?.company}"? This cannot be undone.`}
       />
     </div>
+  );
+}
+
+function EnquiryDetailModal({ enquiry, open, onClose, onEdit, onQuote, jobs = [] }) {
+  if (!enquiry) return null;
+  const linkedJob = jobs.find((j) => j._id === (enquiry.jobId?._id || enquiry.jobId));
+  const field = (label, value) => (
+    <div>
+      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">{label}</p>
+      <p className="text-sm text-slate-800 font-medium">{value || '—'}</p>
+    </div>
+  );
+
+  return (
+    <Dialog open={open} onClose={onClose} title={`Enquiry: ${enquiry.name || 'Details'}`} size="md">
+      <DialogBody className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Badge status={enquiry.status} />
+          {enquiry.source && (
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium capitalize">
+              Source: {enquiry.source}
+            </span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          {field('Client Name', enquiry.name)}
+          {field('Company', enquiry.company)}
+          {field('Phone', enquiry.phone)}
+          {field('Email', enquiry.email)}
+          {field('Service', enquiry.service)}
+          {field('Referred By', enquiry.referredBy)}
+        </div>
+
+        {enquiry.address && field('Address', enquiry.address)}
+
+        {linkedJob && (
+          <div>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Linked Job</p>
+            <p className="text-sm font-mono font-medium text-brand-900 bg-slate-50 p-2.5 rounded border border-slate-200">
+              {linkedJob.atpNumber} — {linkedJob.jobName} ({linkedJob.status})
+            </p>
+          </div>
+        )}
+
+        {enquiry.notes && (
+          <div>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Notes</p>
+            <p className="text-sm text-slate-700 bg-slate-50 rounded-lg p-3 whitespace-pre-wrap">{enquiry.notes}</p>
+          </div>
+        )}
+
+        {field('Date Added', formatDate(enquiry.createdAt))}
+      </DialogBody>
+      <DialogFooter>
+        <Button variant="secondary" onClick={onClose}>Close</Button>
+        {onEdit && (
+          <Button variant="secondary" onClick={() => { onClose(); onEdit(); }}>
+            <Pencil className="h-4 w-4 mr-1.5" /> Edit
+          </Button>
+        )}
+        {onQuote && enquiry.status !== 'quoted' && enquiry.status !== 'converted' && (
+          <Button onClick={() => { onClose(); onQuote(); }}>
+            <ArrowRight className="h-4 w-4 mr-1.5" /> Convert to Quote
+          </Button>
+        )}
+      </DialogFooter>
+    </Dialog>
   );
 }

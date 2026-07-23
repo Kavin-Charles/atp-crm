@@ -1,18 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Briefcase, CheckSquare, Inbox, ArrowRight, Calendar, User, Clock, ShieldCheck } from 'lucide-react';
+import { Briefcase, CheckSquare, Inbox, ArrowRight, Calendar, User, Clock, ShieldCheck, FileText } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { jobsApi } from '@/api/jobs';
 import { tasksApi } from '@/api/tasks';
 import { enquiriesApi } from '@/api/enquiries';
 import Badge from '@/components/ui/Badge';
 import Spinner from '@/components/ui/Spinner';
+import Dialog, { DialogBody, DialogFooter } from '@/components/ui/Dialog';
+import Button from '@/components/ui/Button';
 import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
+
+  const [selectedEnquiry, setSelectedEnquiry] = useState(null);
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [selectedTask, setSelectedTask] = useState(null);
 
   // Query jobs (Backend automatically scopes to user's jobs if non-admin)
   const { data: jobs = [], isLoading: jobsLoading } = useQuery({
@@ -84,7 +91,11 @@ export default function DashboardPage() {
                 </thead>
                 <tbody className="divide-y divide-brand-100">
                   {top5Enquiries.map((enq) => (
-                    <tr key={enq._id} className="hover:bg-brand-50/40 transition-colors">
+                    <tr
+                      key={enq._id}
+                      onClick={() => setSelectedEnquiry(enq)}
+                      className="hover:bg-brand-50/60 transition-colors cursor-pointer"
+                    >
                       <td className="py-3 px-4 font-medium text-brand-900">{enq.name || enq.clientName || '—'}</td>
                       <td className="py-3 px-4 text-brand-600">{enq.company || '—'}</td>
                       <td className="py-3 px-4 text-brand-800 font-medium">{enq.service || '—'}</td>
@@ -142,7 +153,11 @@ export default function DashboardPage() {
                 </thead>
                 <tbody className="divide-y divide-brand-100">
                   {jobs.slice(0, 8).map((job) => (
-                    <tr key={job._id} className="hover:bg-brand-50/40 transition-colors">
+                    <tr
+                      key={job._id}
+                      onClick={() => setSelectedJob(job)}
+                      className="hover:bg-brand-50/60 transition-colors cursor-pointer"
+                    >
                       <td className="py-3 px-4 font-mono font-bold text-xs text-brand-800">
                         {job.atpNumber || '—'}
                       </td>
@@ -196,7 +211,11 @@ export default function DashboardPage() {
                 </thead>
                 <tbody className="divide-y divide-brand-100">
                   {tasks.slice(0, 8).map((task) => (
-                    <tr key={task._id} className="hover:bg-brand-50/40 transition-colors">
+                    <tr
+                      key={task._id}
+                      onClick={() => setSelectedTask(task)}
+                      className="hover:bg-brand-50/60 transition-colors cursor-pointer"
+                    >
                       <td className="py-3 px-4 font-medium text-brand-900">{task.title || '—'}</td>
                       {isAdmin && (
                         <td className="py-3 px-4 text-xs text-brand-600">
@@ -222,6 +241,193 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
+
+      {/* Enquiry Detail Modal */}
+      {selectedEnquiry && (
+        <Dialog open={!!selectedEnquiry} onClose={() => setSelectedEnquiry(null)} title={`Enquiry: ${selectedEnquiry.name || selectedEnquiry.company || 'Details'}`} size="md">
+          <DialogBody className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Badge status={selectedEnquiry.status} />
+              {selectedEnquiry.source && (
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium capitalize">
+                  Source: {selectedEnquiry.source}
+                </span>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Client Name</p>
+                <p className="text-sm font-medium text-slate-800">{selectedEnquiry.name || '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Company</p>
+                <p className="text-sm font-medium text-slate-800">{selectedEnquiry.company || '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Phone</p>
+                <p className="text-sm font-medium text-slate-800">{selectedEnquiry.phone || '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Email</p>
+                <p className="text-sm font-medium text-slate-800">{selectedEnquiry.email || '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Service</p>
+                <p className="text-sm font-medium text-slate-800">{selectedEnquiry.service || '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Referred By</p>
+                <p className="text-sm font-medium text-slate-800">{selectedEnquiry.referredBy || '—'}</p>
+              </div>
+            </div>
+            {selectedEnquiry.address && (
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Address</p>
+                <p className="text-sm text-slate-800">{selectedEnquiry.address}</p>
+              </div>
+            )}
+            {selectedEnquiry.notes && (
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Notes</p>
+                <p className="text-sm text-slate-700 bg-slate-50 rounded-lg p-3 whitespace-pre-wrap">{selectedEnquiry.notes}</p>
+              </div>
+            )}
+          </DialogBody>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setSelectedEnquiry(null)}>Close</Button>
+            <Link to="/enquiries">
+              <Button>Go to Enquiries Page</Button>
+            </Link>
+          </DialogFooter>
+        </Dialog>
+      )}
+
+      {/* Job Detail Modal */}
+      {selectedJob && (
+        <Dialog open={!!selectedJob} onClose={() => setSelectedJob(null)} title={`Job: ${selectedJob.atpNumber} — ${selectedJob.jobName || ''}`} size="lg">
+          <DialogBody className="space-y-4">
+            <div className="flex items-center gap-3 flex-wrap">
+              <Badge status={selectedJob.status} />
+              <Badge status={selectedJob.paymentStatus} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Client Name</p>
+                <p className="text-sm font-medium text-slate-800">{selectedJob.clientName || '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Company</p>
+                <p className="text-sm font-medium text-slate-800">{selectedJob.company || '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Job Owner</p>
+                <p className="text-sm font-medium text-slate-800">{selectedJob.jobOwner || '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Designer(s)</p>
+                <p className="text-sm font-medium text-slate-800">
+                  {Array.isArray(selectedJob.designer) ? selectedJob.designer.join(' / ') : selectedJob.designer || '—'}
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Quoted Hours</p>
+                <p className="text-sm font-medium text-slate-800">{selectedJob.quotedHours || '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Worked Hours</p>
+                <p className="text-sm font-medium text-slate-800">{selectedJob.workedHours || '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Payment Mode</p>
+                <p className="text-sm font-medium text-slate-800">{selectedJob.paymentMode || '—'}</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Started</p>
+                <p className="text-sm text-slate-800">{selectedJob.startedDate ? formatDate(selectedJob.startedDate) : '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Expected</p>
+                <p className="text-sm text-slate-800">{selectedJob.expectedCompletion ? formatDate(selectedJob.expectedCompletion) : '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Released</p>
+                <p className="text-sm text-slate-800">{selectedJob.releaseDate ? formatDate(selectedJob.releaseDate) : '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Backup</p>
+                <p className="text-sm text-slate-800">{selectedJob.backupDate ? formatDate(selectedJob.backupDate) : '—'}</p>
+              </div>
+            </div>
+            {selectedJob.info && (
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Job Info</p>
+                <p className="text-sm text-slate-700 bg-slate-50 rounded-lg p-3 whitespace-pre-wrap">{selectedJob.info}</p>
+              </div>
+            )}
+          </DialogBody>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setSelectedJob(null)}>Close</Button>
+            <Link to="/jobs">
+              <Button>Go to Jobs Page</Button>
+            </Link>
+          </DialogFooter>
+        </Dialog>
+      )}
+
+      {/* Task Detail Modal */}
+      {selectedTask && (
+        <Dialog open={!!selectedTask} onClose={() => setSelectedTask(null)} title={`Task: ${selectedTask.title}`} size="md">
+          <DialogBody className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Badge status={selectedTask.status} />
+              <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium capitalize border ${
+                selectedTask.priority === 'urgent' ? 'bg-red-50 text-red-700 border-red-200' :
+                selectedTask.priority === 'high' ? 'bg-orange-50 text-orange-700 border-orange-200' :
+                selectedTask.priority === 'medium' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                'bg-gray-50 text-gray-700 border-gray-200'
+              }`}>
+                Priority: {selectedTask.priority || 'medium'}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Assigned To</p>
+                <p className="text-sm font-medium text-slate-800">{selectedTask.assignedTo || '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Assigned By</p>
+                <p className="text-sm font-medium text-slate-800">{selectedTask.assignedBy || '—'}</p>
+              </div>
+              {selectedTask.jobRef && (
+                <div className="col-span-2">
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Linked Job Ref</p>
+                  <p className="text-sm font-mono font-medium text-brand-900">{selectedTask.jobRef}</p>
+                </div>
+              )}
+            </div>
+            {selectedTask.description && (
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Description</p>
+                <p className="text-sm text-slate-700 bg-slate-50 rounded-lg p-3 whitespace-pre-wrap">{selectedTask.description}</p>
+              </div>
+            )}
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Created Date</p>
+              <p className="text-sm text-slate-600">{selectedTask.createdAt ? format(new Date(selectedTask.createdAt), 'dd MMM yyyy, hh:mm a') : '—'}</p>
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setSelectedTask(null)}>Close</Button>
+            <Link to="/tasks">
+              <Button>Go to Tasks Page</Button>
+            </Link>
+          </DialogFooter>
+        </Dialog>
+      )}
     </div>
   );
 }
