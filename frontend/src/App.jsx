@@ -12,6 +12,7 @@ import DataViewerPage from '@/pages/DataViewerPage';
 import UsersPage from '@/pages/UsersPage';
 import CalendarPage from '@/pages/CalendarPage';
 import TasksPage from '@/pages/TasksPage';
+import AttendancePage from '@/pages/AttendancePage';
 import Spinner from '@/components/ui/Spinner';
 
 function ProtectedRoute({ children, roles }) {
@@ -31,6 +32,7 @@ function AppRoutes() {
       <Route path="/login" element={user ? <Navigate to="/" replace /> : <LoginPage />} />
       <Route path="/" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
         <Route index element={<DashboardPage />} />
+        <Route path="attendance" element={<AttendancePage />} />
         <Route path="enquiries" element={<ProtectedRoute roles={['admin', 'manager']}><EnquiriesPage /></ProtectedRoute>} />
         <Route path="quotes" element={<ProtectedRoute roles={['admin', 'manager']}><QuotesPage /></ProtectedRoute>} />
         <Route path="jobs" element={<JobsPage />} />

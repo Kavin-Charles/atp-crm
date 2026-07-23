@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Inbox, FileText, Briefcase,
-  Upload, Database, Users, LogOut,
+  Upload, Database, Users, LogOut, Clock,
   ChevronLeft, ChevronRight, KeyRound, CalendarDays, CheckSquare,
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 
 const NAV_ITEMS = [
   { label: 'Dashboard',   icon: LayoutDashboard, path: '/',          exact: true },
+  { label: 'Attendance',  icon: Clock,           path: '/attendance'             },
   { label: 'Enquiries',   icon: Inbox,            path: '/enquiries', roles: ['admin', 'manager'] },
   { label: 'Quotes',      icon: FileText,         path: '/quotes',   roles: ['admin', 'manager'] },
   { label: 'Jobs',        icon: Briefcase,        path: '/jobs'                   },
